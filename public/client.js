@@ -1,38 +1,43 @@
 const $ = (id) => document.getElementById(id);
 const messages = $("messages");
-let socket; let joined = false;
+let socket;
+let joined = false;
 
-// Bildirim sesi ekle
-const notificationSound = new Audio('notification.mp3');
-
-function esc(s){
-  return s.replace(/[&<>\"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
-  }[c]));
+// XSS koruması için
+function esc(s) {
+  return s.replace(/[&<>\"']/g, c =>
+    ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#39;"
+    }[c])
+  );
 }
 
-function addMsg(html, cls=''){
-  const d=document.createElement('div');
-  d.className='m '+cls; 
-  d.innerHTML=html; 
+function addMsg(html, cls = '') {
+  const d = document.createElement('div');
+  d.className = 'm ' + cls;
+  d.innerHTML = html;
   messages.appendChild(d);
   messages.scrollTop = messages.scrollHeight;
 }
 
-function qs(name){
-  const u=new URL(location.href); 
+function qs(name) {
+  const u = new URL(location.href);
   return u.searchParams.get(name);
 }
 
-function setShareLink(room){
-  const u=new URL(location.href);
+function setShareLink(room) {
+  const u = new URL(location.href);
   u.searchParams.set('r', room);
-  navigator.clipboard.writeText(u.toString()).then(()=>{
-    addMsg('<span class="sys">Oda linki panoya kopyalandı.</span>','sys');
+  navigator.clipboard.writeText(u.toString()).then(() => {
+    addMsg('<span class="sys">Oda linki panoya kopyalandı.</span>', 'sys');
   });
 }
 
-async function join(){
+async function join() {
   const name = $("name").value.trim() || 'Anon';
   const room = $("room").value.trim() || 'lobby';
 
@@ -42,20 +47,29 @@ async function join(){
     socket.emit('join', { room, name });
     $("status").textContent = `Oda: ${room} | ${name}`;
     joined = true;
+
+    // İlk girişte bildirim izni sor
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
   });
 
-  socket.on('system', (t) => 
-    addMsg(`<span class="sys">${esc(t)}</span>`, 'sys')
-  );
+  socket.on('system', (t) => addMsg(`<span class="sys">${esc(t)}</span>`, 'sys'));
 
   socket.on('chat', ({ from, text, ts }) => {
-    const time = new Date(ts||Date.now()).toLocaleTimeString();
+    const time = new Date(ts || Date.now()).toLocaleTimeString();
     addMsg(`<span class="nick">${esc(from)}</span> [${time}]: ${esc(text)}`);
 
-    // Bildirim sesi çal
-    notificationSound.play().catch(err => {
-      console.log("Ses çalınamadı:", err);
-    });
+    // Ses çal
+    new Audio("notification.mp3").play().catch(() => {});
+
+    // Web Notification gönder
+    if (Notification.permission === "granted") {
+      new Notification(`${from} dedi ki:`, {
+        body: text,
+        icon: "https://cdn-icons-png.flaticon.com/512/1384/1384060.png"
+      });
+    }
   });
 
   $("app").classList.remove('hidden');
@@ -66,16 +80,18 @@ $("joinBtn").onclick = join;
 $("share").onclick = () => setShareLink($("room").value.trim() || 'lobby');
 
 // form submit
-const form = $("form"), input=$("input");
+const form = $("form"),
+  input = $("input");
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   if (!joined) return;
-  const val = input.value.trim(); if (!val) return;
+  const val = input.value.trim();
+  if (!val) return;
   socket.emit('chat', val);
-  addMsg(`<span class="nick">Ben</span>: ${esc(val)}`);
-  input.value='';
+  addMsg(`<span class=\"nick\">Ben</span>: ${esc(val)}`);
+  input.value = '';
 });
 
 // URL'den oda cek (r=)
-const r = qs('r'); 
+const r = qs('r');
 if (r) $("room").value = r;
