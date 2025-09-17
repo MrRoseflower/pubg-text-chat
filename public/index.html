@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PUBG Squad Text Chat</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <h1>PUBG Squad Text Chat</h1>
+
+    <div class="join">
+      <input id="name" placeholder="Nick" maxlength="24">
+      <input id="room" placeholder="Oda (örn: erangel-1)" maxlength="64">
+      <button id="joinBtn">Katıl</button>
+    </div>
+
+    <div id="app" class="app hidden">
+      <div class="hud">
+        <span id="status">Bağlı değil</span>
+        <button id="share">Oda linki kopyala</button>
+      </div>
+
+      <div class="chat">
+        <div id="messages"></div>
+        <form id="form">
+          <input id="input" autocomplete="off" placeholder="Mesaj yaz…">
+          <button>Gönder</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/client.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+*{box-sizing:border-box}
+body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#0c1116;color:#e6edf3}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+h1{margin:8px 0 12px}
+.join{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+input,button{padding:10px 12px;border-radius:10px;border:1px solid #2a3340;background:#121826;color:#e6edf3}
+button{cursor:pointer}
+.app.hidden{display:none}
+.hud{display:flex;gap:12px;align-items:center;margin:8px 0 12px}
+.chat{border:1px solid #293546;border-radius:12px;overflow:hidden}
+#messages{height:50vh;overflow:auto;padding:8px;background:#0e141b}
+#messages .m{padding:6px 8px;margin:4px 6px;border-radius:8px;background:#141c24}
+#messages .sys{opacity:.7}
+#messages .nick{color:#8ad}
+#form{display:flex;gap:8px;padding:8px;border-top:1px solid #293546}
+#input{flex:1}
